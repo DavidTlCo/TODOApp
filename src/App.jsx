@@ -1,31 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import TodoForm from './components/TodoForm';
 import TodoList from './components/TodoList';
 
-const initialTodos = [
-  {
-    id: 1,
-    title: 'Aprender React',
-    description: 'Terminar el tutorial práctico de React en YouTube',
-    completed: false
-  },
-  {
-    id: 2,
-    title: 'Tareas RAMA',
-    description: 'Atender las tareas pendientes de práctica profesional',
-    completed: false
-  },
-  {
-    id: 3,
-    title: 'Comer con el chavito',
-    description: 'Regresar a casa y calentar comida para comer',
-    completed: false
-  }
-];
+const initialTodos = [];
+
+// Recuperando del localStorage los todos almacenados
+const localTodos = JSON.parse(localStorage.getItem('todos'));
 
 const App = () => {
-  const [ todos, setTodos ] = useState(initialTodos);
-  const [todoEdit, settodoEdit] = useState(null)
+  const [ todos, setTodos ] = useState(localTodos || initialTodos);
+  const [todoEdit, settodoEdit] = useState(null);
+
+  // Guardar en localstorage los todos
+  useEffect(() => {
+    localStorage.setItem('todos', JSON.stringify(todos));
+  }, [todos]);
 
   // Agregar una nueva tarea
   const addTodo = todo => {
@@ -58,6 +47,11 @@ const App = () => {
 
   // Eliminar un todo
   const deleteTodo = id => {
+    // Se cancela la actualización en caso de eliminación
+    if( todoEdit && id === todoEdit.id){
+      settodoEdit(null);
+    }
+
     const updatedTodos = todos.filter(todo => todo.id !== id);
     setTodos(updatedTodos);
   }
@@ -88,7 +82,7 @@ const App = () => {
   return (
     <div className="container">
       <div className="row mt-3">
-        <div className="col-8">
+        <div className=" col-12 col-lg-8 mb-5">
           <TodoList 
             todos={ todos }
             deleteTodo={ deleteTodo }
@@ -96,7 +90,7 @@ const App = () => {
             setTodoEdit={ settodoEdit }
           />
         </div>
-        <div className="col-4">
+        <div className="mx-auto col-sm-8 col-12 col-lg-4">
           <TodoForm
             addTodo={ addTodo }
             todoEdit={ todoEdit }
